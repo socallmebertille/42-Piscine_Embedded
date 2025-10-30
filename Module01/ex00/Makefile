@@ -1,0 +1,52 @@
+#================================ Colors ================================
+
+CYAN     = \033[38;5;45m
+PINK     = \033[38;5;213m
+RED      = \033[38;5;203m
+GREEN    = \033[38;5;77m
+YELLOW   = \033[38;5;220m
+RESET    = \033[0m
+
+#================================ Values ================================
+
+NAME        = main
+MCU         = atmega328p # Target microcontroller
+F_CPU       ?= 16000000UL # CPU clock frequeRESETy
+
+CC          = avr-gcc       # AVR C compiler
+OBJCOPY     = avr-objcopy   # Converts .bin to .hex
+AVRDUDE     = avrdude       # Flashes the program to the board via serial port
+
+CFLAGS      = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os 
+
+PROGRAMMER  = arduino
+PORT        = /dev/ttyUSB1  # Adjust depending on your computer
+BAUD        = 115200
+
+AVRDUDE_FLAGS = -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(NAME).hex
+
+#================================ Rules ================================
+
+all: hex flash
+
+hex: $(NAME).c
+	@echo "$(CYAN)🗘 Compiling $(NAME).c...$(RESET)"
+	@$(CC) $(CFLAGS) -o $(NAME).bin $(NAME).c
+	@echo "$(YELLOW)🗘 Converting binary to HEX...$(RESET)"
+	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).bin $(NAME).hex
+	@echo "$(GREEN)✔ HEX file generated: $(NAME).hex$(RESET)"
+
+flash:
+	@echo "$(PINK)→ Flashing microcontroller via avrdude...$(RESET)"
+	@$(AVRDUDE) $(AVRDUDE_FLAGS)
+	@echo "$(GREEN)✔ Flash completed successfully.$(RESET)"
+
+clean:
+	@echo "$(RED)🗑 Removing binary and HEX files...$(RESET)"
+	@rm -f $(NAME).bin $(NAME).hex
+	@echo "$(GREEN)♻ Directory cleaned.$(RESET)"
+
+re: clean all
+
+
+.PHONY: all hex flash clean re
