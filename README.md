@@ -15,6 +15,7 @@
   <li class="my-0"><a href="#overview">Overview</a></li>
   <ul class="list-disc pl-4 my-0">
     <li class="my-0"><a href="#few-embedded-notions">Few Embedded notions</a></li>
+    <li class="my-0"><a href="#initialization-on-windows-avec-terminal-wsl">Initialization on Windows avec terminal WSL</a></li>
   </ul>
   <li class="my-0"><a href="#ok">Ok</a>
   <ul class="list-disc pl-4 my-0">
@@ -24,6 +25,22 @@
 </ul>
 
 <h2>Overview</h2>
+<h3>Initialization on Windows avec terminal WSL</h3>
+
+Ouvrir Windows Powershel en tant qu'administrateur, puis :
+
+| Étape | Commande                                      | Objectif                                     |
+| ----- | --------------------------------------------- | -------------------------------------------- |
+| 1     | `usbipd list`                                 | List les ports et trouve le microcontrolleur |
+| 2     | `usbipd detach --busid x-x`                   | Libère le port x-x                           |
+| 3     | `usbipd attach --wsl --busid x-x`             | Attache au bon WSL                           |
+
+Et finalement sur le terminal WSL :
+| Étape | Commande                                      | Objectif                                     |
+| ----- | --------------------------------------------- | -------------------------------------------- |
+| 4     | `ls /dev/ttyUSB*`                             | Quelque chose comme `/dev/ttyUSB0`           |
+| 5     | `make flash` (ou `avrdude ...`)               | Flashe le code                               |
+
 <h3>Few Embedded notions</h3>
 
 #### Les concepts

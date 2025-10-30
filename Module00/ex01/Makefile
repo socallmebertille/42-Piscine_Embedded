@@ -1,19 +1,17 @@
-# **************************************************************************** #
-#                                   Colors                                     #
-# **************************************************************************** #
-GREEN   = \033[0;32m
-RED     = \033[0;31m
-YELLOW  = \033[0;33m
-CYAN    = \033[1;36m
-MAGENTA = \033[0;35m
-NC      = \033[0m
+#================================ Colors ================================
 
-# **************************************************************************** #
-#                                   Project                                    #
-# **************************************************************************** #
+CYAN     = \033[38;5;45m
+PINK     = \033[38;5;213m
+RED      = \033[38;5;203m
+GREEN    = \033[38;5;77m
+YELLOW   = \033[38;5;220m
+RESET    = \033[0m
+
+#================================ Values ================================
+
 NAME        = main
 MCU         = atmega328p # Target microcontroller
-F_CPU       ?= 16000000UL # CPU clock frequency
+F_CPU       ?= 16000000UL # CPU clock frequeRESETy
 
 CC          = avr-gcc       # AVR C compiler
 OBJCOPY     = avr-objcopy   # Converts .bin to .hex
@@ -27,32 +25,28 @@ BAUD        = 115200
 
 AVRDUDE_FLAGS = -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(NAME).hex
 
-# **************************************************************************** #
-#                                   Rules                                      #
-# **************************************************************************** #
+#================================ Rules ================================
 
 all: hex flash
 
 hex: $(NAME).c
-	@echo "$(CYAN)๐”ง Compiling $(NAME).c...$(NC)"
+	@echo "$(CYAN)🗘 Compiling $(NAME).c...$(RESET)"
 	@$(CC) $(CFLAGS) -o $(NAME).bin $(NAME).c
-	@echo "$(YELLOW)๐” Converting binary to HEX...$(NC)"
+	@echo "$(YELLOW)🗘 Converting binary to HEX...$(RESET)"
 	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).bin $(NAME).hex
-	@echo "$(GREEN)โ… HEX file generated: $(NAME).hex$(NC)"
+	@echo "$(GREEN)✔ HEX file generated: $(NAME).hex$(RESET)"
 
 flash:
-	@echo "$(MAGENTA)โก Flashing microcontroller via avrdude...$(NC)"
+	@echo "$(PINK)→ Flashing microcontroller via avrdude...$(RESET)"
 	@$(AVRDUDE) $(AVRDUDE_FLAGS)
-	@echo "$(GREEN)โ… Flash completed successfully.$(NC)"
+	@echo "$(GREEN)✔ Flash completed successfully.$(RESET)"
 
 clean:
-	@echo "$(RED)๐งน Removing binary and HEX files...$(NC)"
+	@echo "$(RED)🗑 Removing binary and HEX files...$(RESET)"
 	@rm -f $(NAME).bin $(NAME).hex
-	@echo "$(GREEN)โ… Directory cleaned.$(NC)"
+	@echo "$(GREEN)♻ Directory cleaned.$(RESET)"
 
 re: clean all
 
-# **************************************************************************** #
-#                                   Phony                                      #
-# **************************************************************************** #
+
 .PHONY: all hex flash clean re

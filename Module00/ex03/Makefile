@@ -20,7 +20,7 @@ AVRDUDE     = avrdude       # Flashes the program to the board via serial port
 CFLAGS      = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os 
 
 PROGRAMMER  = arduino
-PORT        = /dev/ttyUSB0  # Adjust depending on your computer
+PORT        = /dev/ttyUSB1  # Adjust depending on your computer
 BAUD        = 115200
 
 AVRDUDE_FLAGS = -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(NAME).hex
