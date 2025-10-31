@@ -105,6 +105,8 @@ Exemple :
 - `PORTB |= (1 << PB0);` → met à 1 le bit 0 sans toucher aux autres bits.
 - `PORTB &= ~(1 << PB0);` → met à 0 le bit 0 sans affecter les autres.
 - `if (PINB & (1 << PB1)) { // le bouton relié à PB1 est pressé }` → l'input de la broche B 
+- `(1 << 0) = 0001` →  est un `mask`, `1 << 0` veut dire : décale le 1 de zéro position → donc
+`(1 << 0) = 0b00000001` (en binaire) = `1` (en décimal).
 
 <h2>Ok</h2>
 <h3>Ok</h3>
