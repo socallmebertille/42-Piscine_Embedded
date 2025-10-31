@@ -10,8 +10,8 @@ RESET    = \033[0m
 #================================ Values ================================
 
 NAME        = main
-MCU         = atmega328p # Target microcontroller
-F_CPU       ?= 16000000UL # CPU clock frequeRESETy
+MCU         = atmega328p    # Target microcontroller
+F_CPU       ?= 16000000UL   # CPU clock frequeRESETy
 
 CC          = avr-gcc       # AVR C compiler
 OBJCOPY     = avr-objcopy   # Converts .bin to .hex

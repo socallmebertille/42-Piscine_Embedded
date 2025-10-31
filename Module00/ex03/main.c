@@ -4,8 +4,8 @@
 int main(void)
 {
     int on = 0;
-    DDRB |= (1 << PB0);
-    DDRD &= ~(1 << PD2);
+    DDRB |= (1 << PB0); // Configuration LED (sortie)
+    DDRD &= ~(1 << PD2); // PD2 (= boutton) en entrée
     
     while (1)
     {
