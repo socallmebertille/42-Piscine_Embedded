@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-void turn_my_led(int value)
+void turn_my_led(char value)
 {
     PORTB = 0;                // j'éteins mes 4 leds
     if (value & (1 << 0))     // si value_bit[0] == 1
@@ -17,7 +17,7 @@ void turn_my_led(int value)
 int main(void)
 {
     // initialisation à 0
-    int value = 0;
+    char value = 0;
     DDRB |= (1 << PB0) | (1 << PB1) | (1 << PB2) | (1 << PB4);
     // initialisation des boutons comme des entrées
     DDRD &= ~(1 << PD2);
