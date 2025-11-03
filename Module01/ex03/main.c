@@ -35,7 +35,7 @@ int main(void)
             _delay_ms(50);                     // Anti-rebond
             if (!(PIND & (1 << PD4)))          // Toujours appuyé après anti-rebond ?
             {
-                if (OCR1A > step)              // Si on peut encore décrémenter (min 10%)
+                if (OCR1A - step > step)       // Si on peut encore décrémenter (min 10%)
                     OCR1A -= step;             // on réduit le duty cycle de 10%
 
                 while (!(PIND & (1 << PD4)));  // Attendre relâchement
