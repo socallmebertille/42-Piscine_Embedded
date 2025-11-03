@@ -197,6 +197,21 @@ if (!(PIND & (1 << PD2)))       // 1. Détection initiale
 - Garantit que c'est un vrai appui stable
 - Évite les faux positifs
 
+#### `screen` : terminal série en ligne de commande
+
+`screen` est un terminal virtuel qu’on peut attacher directement à un périphérique série (`/dev/ttyUSB0`, `/dev/ttyACM0`, etc.).
+Il sert à écouter et envoyer des données sur le port série de ton microcontrôleur.
+
+| Action                | Commande                                      |
+| --------------------- | --------------------------------------------- |
+| Lancer `screen`       | `screen /dev/ttyUSB0 115200`                  |
+| Quitter proprement    | `Ctrl + A`, puis `Ctrl + D` ou taper `:quit`  |
+| Détacher              | `Ctrl + A`, `D`                               |
+| Lister les sessions   | `screen -ls`                                  |
+| Rejoindre une session | `screen -r`                                   |
+| Forcer la fermeture   | `sudo fuser -k /dev/ttyUSB0`                  |
+
+
 
 <h2>Ok</h2>
 <h3>Ok</h3>
