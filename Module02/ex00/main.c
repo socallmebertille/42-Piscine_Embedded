@@ -1,6 +1,5 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include <avr/interrupt.h>
 
 #define BAUD 115200
 #define UART_BAUDRATE (F_CPU / (16 * BAUD))
@@ -15,7 +14,7 @@ void uart_init(void)
     // Initialise format, ici 8N1, ex envoie 'A' -> start 0100 0001 stop
     //                                              0     0100 0001 1
     // 8 bits, aucun bit de parité (pas de vérification d’erreur), 1 stop bit de fin de trame
-    UCSR0C = (1 << USBS0) | (3 << UCSZ00);
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
 void uart_tx(char c)
