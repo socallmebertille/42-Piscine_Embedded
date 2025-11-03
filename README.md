@@ -14,8 +14,8 @@
 <ul class="list-disc pl-4 my-0">
   <li class="my-0"><a href="#overview">Overview</a></li>
   <ul class="list-disc pl-4 my-0">
-    <li class="my-0"><a href="#few-embedded-notions">Few Embedded notions</a></li>
     <li class="my-0"><a href="#initialization-on-windows-avec-terminal-wsl">Initialization on Windows avec terminal WSL</a></li>
+    <li class="my-0"><a href="#few-embedded-notions">Few Embedded notions</a></li>
   </ul>
   <li class="my-0"><a href="#ok">Ok</a>
   <ul class="list-disc pl-4 my-0">
