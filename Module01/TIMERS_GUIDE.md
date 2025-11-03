@@ -173,7 +173,10 @@ Durée max = 65536 × (1 / F_timer)
 
 ```
 F_timer = F_CPU / Prescaler
+
 OCR1A = (F_timer / F_désirée) - 1
+
+Duty (%) = (OCR1A / ICR1) × 100
 ```
 
 ### Formule inverse : trouver le prescaler

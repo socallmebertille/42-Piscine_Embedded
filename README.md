@@ -108,5 +108,95 @@ Exemple :
 - `(1 << 0) = 0001` →  est un `mask`, `1 << 0` veut dire : décale le 1 de zéro position → donc
 `(1 << 0) = 0b00000001` (en binaire) = `1` (en décimal).
 
+#### Le pull-up
+
+Une **résistance** qui "tire vers le haut" (VCC) le signal quand rien n'est connecté.
+
+##### Sans pull-up : ❌ PROBLÈME
+
+```
+        VCC (+5V)
+           │
+         [SW1]
+           │
+           ├──────→ PD2 (lecture)
+           │
+          ??? ← Pin FLOTTANTE (lecture aléatoire)
+```
+
+##### Avec pull-up : ✅ STABLE
+
+```
+        VCC (+5V)
+           │
+           ├─── [Pull-up ~47kΩ] ← Maintient HIGH par défaut
+           │                 │
+         [SW1]              │
+           │                │
+           ├────────────────┴──→ PD2 (lecture)
+           │
+          GND (0V)
+```
+
+##### Activation dans le code
+
+```c
+DDRD &= ~(1 << PD2);    // 1. Configurer en ENTRÉE
+PORTD |= (1 << PD2);    // 2. Activer pull-up interne
+```
+
+##### États
+
+| Bouton | Circuit | PD2 |
+|--------|---------|-----|
+| **Relâché** | VCC → Pull-up → PD2 | **HIGH** (5V) |
+| **Appuyé** | VCC → SW1 → GND | **LOW** (0V) |
+
+##### Logique de lecture
+
+```c
+if (!(PIND & (1 << PD2)))  // Si LOW → bouton appuyé
+```
+
+#### L'anti-rebond (= debouncing effect)
+
+Les boutons mécaniques ont des **rebonds** pendant 5-50ms :
+
+```
+Appui physique :
+        ┌─────────────────────
+        │
+────────┘
+
+Signal électrique réel :
+        ┌─┐ ┌──┐  ┌──────────
+        │ │ │  │  │
+────────┘ └─┘  └──┘
+        ↑─────────↑
+        Rebonds (5-50ms)
+```
+
+##### Technique de debouncing
+
+```c
+if (!(PIND & (1 << PD2)))       // 1. Détection initiale
+{
+    _delay_ms(50);              // 2. Attendre stabilisation (50ms)
+    if (!(PIND & (1 << PD2)))   // 3. Confirmer que toujours appuyé
+    {
+        // Action (incrément, etc.)
+
+        while (!(PIND & (1 << PD2)));  // 4. Attendre relâchement
+        _delay_ms(50);                 // 5. Anti-rebond du relâchement
+    }
+}
+```
+
+**Pourquoi la double vérification ?**
+- Filtre les parasites électriques
+- Garantit que c'est un vrai appui stable
+- Évite les faux positifs
+
+
 <h2>Ok</h2>
 <h3>Ok</h3>
