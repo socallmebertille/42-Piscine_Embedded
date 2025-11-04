@@ -47,8 +47,32 @@ int main(void)
     {
         for (uint8_t i = 0; i < 255; i++)
         {
-            wheel(i);
-            _delay_ms(10); // Vitesse de transition
+            wheel(i);      // Intensité des différentes 3 couleurs pour parcourir toutes les combinaisons
+            _delay_ms(10); // ATTEND 10ms avant la prochaine couleur -> Vitesse de transition
         }
     }
 }
+
+/*
+
+Choix du prescaler selon rapidité de clignotement visible à l'oeil nu
+
+| Prescaler	| Formule	         | F_PWM    |	Perception               |
+|-----------|--------------------|----------|----------------------------|
+| /1	    | 16M / (1 × 256)	 | 62.5 kHz	| Trop rapide, gaspille CPU  |
+| /8	    | 16M / (8 × 256)	 | 7.8 kHz	| Rapide, bon pour servo     |
+| /64 ⭐	   | 16M / (64 × 256)	| 976 Hz   | Parfait pour LED ✓         |
+| /256	    | 16M / (256 × 256)	 | 244 Hz	| Visible, clignotement      |
+| /1024     | 16M / (1024 × 256) |	61 Hz	| Trop lent, scintillement   |
+
+Choix du temps de délais avant chaque changement de couleurs
+
+| Délai	    |Temps pour 1 cycle complet |	Effet visuel                                  |
+|-----------|---------------------------|-------------------------------------------------|
+| 0 ms	    | 0 secondes	            | Trop rapide, couleurs floues, impossible à voir |
+| 1 ms	    | 256 ms = 0.25 sec	        | Très rapide, arc-en-ciel fluide mais rapide     |
+| 10 ms ⭐  | 2560 ms = 2.5 sec	       | Fluide et visible ✓                             |
+| 50 ms	    | 12.8 sec	                | Lent, transitions visibles                      |
+| 100 ms    | 25.6 sec	                | Très lent, défilement saccadé                   |
+
+*/
