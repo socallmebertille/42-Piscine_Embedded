@@ -8,16 +8,16 @@ void led_init(void)
 
 void timer_led_init(void)
 {
-    // Mode CTC (Clear Timer on Compare Match)
-    TCCR0A |= (1 << WGM01);
-    
-    // Prescaler = /1 (plus rapide pour PWM)
-    TCCR0B |= (1 << CS10);
-    
-    // Fréquence PWM ~1kHz ---> 16MHz / 64 / 250 = 1kHz
+    // Mode CTC : le compteur se remet à 0 quand il atteint OCR0A
+    TCCR0A = (1 << WGM01);
+
+    // Horloge sans prescaler → fréquence = F_CPU / (OCR0A + 1)
+    TCCR0B = (1 << CS00); // prescaler /1
+
+    // Valeur de comparaison : 250 → fréquence d’interruption = 16 000 000 Hz / 250 = 64 000 Hz
     OCR0A = 250;
     
-    // Active l'interrupt sur comparaison
+    // Active l’interruption de comparaison (TIMER0_COMPA_vect)
     TIMSK0 |= (1 << OCIE0A);
 }
 
@@ -34,7 +34,7 @@ void led_loading(void)
     
     counter++;
     
-    // Software PWM : allume la LED si brightness > counter
+    // Allume la LED si brightness > counter
     PORTB = 0;
     if (brightness[0] > counter) PORTB |= (1 << PB0);
     if (brightness[1] > counter) PORTB |= (1 << PB1);
@@ -66,7 +66,7 @@ void res_led_blink(char res)
     DDRD |= (1 << PD3) | (1 << PD5) | (1 << PD6); // Active ma LED RGB en mode sortie
     PORTD = 0; // Éteint ma LED RGB
 
-    if (res == 1) // Arc-en-ciel / discothèque
+    if (res == 1) // 3 clignotements vert + effet discothèque
     {
         for (char i = 0; i < 3; i++)
         {
@@ -75,41 +75,37 @@ void res_led_blink(char res)
             PORTD = 0;            // RGB OFF
             _delay_ms(200);
         }
-        // Effet disco : 20 clignotements de couleurs aléatoires
         for (char i = 0; i < 20; i++)
         {
-            // Cycle de couleurs : Rouge → Vert → Bleu → Jaune → Cyan → Magenta → Blanc
             switch (i % 7)
             {
-                case 0: // Rouge
+                case 0: // Vert
                     PORTD = (1 << PD6);
                     break;
-                case 1: // Vert
+                case 1: // Rouge
                     PORTD = (1 << PD5);
                     break;
                 case 2: // Bleu
                     PORTD = (1 << PD3);
                     break;
-                case 3: // Jaune (Rouge + Vert)
+                case 3: // Jaune (Vert + Rouge)
                     PORTD = (1 << PD6) | (1 << PD5);
                     break;
-                case 4: // Cyan (Vert + Bleu)
+                case 4: // Magenta (Rouge + Bleu)
                     PORTD = (1 << PD5) | (1 << PD3);
                     break;
-                case 5: // Magenta (Rouge + Bleu)
+                case 5: // Cyan (Vert + Bleu)
                     PORTD = (1 << PD6) | (1 << PD3);
                     break;
                 case 6: // Blanc (toutes les couleurs)
                     PORTD = (1 << PD6) | (1 << PD5) | (1 << PD3);
                     break;
             }
-            _delay_ms(100);  // Vitesse du disco (ajustez)
+            _delay_ms(100);  // Vitesse du changement de couleur disco
         }
-        
         PORTD = 0;  // Éteint la LED RGB à la fin
-        // Le programme reste bloqué ici (step++ dans main)
     }
-    else // Clignotement rouge
+    else // 3 clignotements rouge
     {
         for (char i = 0; i < 3; i++)
         {
