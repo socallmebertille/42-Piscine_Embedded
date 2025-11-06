@@ -18,25 +18,25 @@ int main(void)
         switch (step)
         {
             case 0: // Rouge
-                PORTD = (1 << LED_R);
+                PORTD |= (1 << LED_R);
                 break;
             case 1: // Vert
-                PORTD = (1 << LED_G);
+                PORTD |= (1 << LED_G);
                 break;
             case 2: // Bleu
-                PORTD = (1 << LED_B);
+                PORTD |= (1 << LED_B);
                 break;
             case 3: // Jaune (Vert + Rouge)
-                PORTD = (1 << LED_G) | (1 << LED_R);
+                PORTD |= (1 << LED_G) | (1 << LED_R);
                 break;
             case 4: // Cyan (Vert + Bleu)
-                PORTD = (1 << LED_G) | (1 << LED_B);
+                PORTD |= (1 << LED_G) | (1 << LED_B);
                 break;
             case 5: // Magenta (Rouge + Bleu)
-                PORTD = (1 << LED_R) | (1 << LED_B);
+                PORTD |= (1 << LED_R) | (1 << LED_B);
                 break;
             case 6: // Blanc (toutes les couleurs)
-                PORTD = (1 << LED_G) | (1 << LED_R) | (1 << LED_B);
+                PORTD |= (1 << LED_G) | (1 << LED_R) | (1 << LED_B);
                 break;
         }
         step = (step + 1) % 7;
