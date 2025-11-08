@@ -56,7 +56,7 @@ static uint8_t get_color_in_255(char *color)
     return result;
 }
 
-void get_led(char *color)
+void set_led(char *color)
 {
     // Sauter le '#'
     color++;

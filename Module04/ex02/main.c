@@ -43,7 +43,7 @@ void set_leds(void)
 
 ISR(INT0_vect) // Code à exécuter quand l'interrupt lie a SW1 se déclenche
 {
-    _delay_ms(20); // attendre la fin des rebonds
+    _delay_ms(50); // attendre la fin des rebonds
     if (!(PIND & (1 << PD2))) { // si toujours appuyé
         value++;
         if (value > 15) value = 0;
@@ -53,7 +53,7 @@ ISR(INT0_vect) // Code à exécuter quand l'interrupt lie a SW1 se déclenche
 
 ISR(PCINT2_vect) // Code à exécuter quand l'interrupt lie a SW2 se déclenche
 {
-    _delay_ms(20); // attendre la fin des rebonds
+    _delay_ms(50); // attendre la fin des rebonds
     if (!(PIND & (1 << PD4))) { // si toujours appuyé
         value--;
         if (value < 0) value = 15;

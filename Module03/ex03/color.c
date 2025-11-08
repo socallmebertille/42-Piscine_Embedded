@@ -8,7 +8,7 @@ char is_valid_color(char c)
     
     // Vérifier si c'est valide
     if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'))
-        return 1;
+        return c;
 
     return 0;
 }
@@ -23,8 +23,13 @@ void get_color(void)
         if (c == '\r' || c == '\n')          // Si touche enter
         {
             uart_printstr("\r\n");
-            buffer[count] = '\0';
-            get_led(buffer);                // On allume la led de la bonne couleur
+            if (count == 7)
+            {
+                buffer[count] = '\0';
+                set_led(buffer);                // On allume la led de la bonne couleur
+            }
+            else
+                uart_printstr("The color must be sent in <#RRGGBB> format.\r\n");
             return;                         // On relance get_color(); du départ
         }
         else if (c == '\b' || c == 127)     // Si touche backspace (= DEL)
@@ -32,17 +37,18 @@ void get_color(void)
             if (count > 0)                  // Seulement si il y a des caractères à effacer
             {
                 uart_printstr("\b \b");
+                buffer[count] = '\0';
                 count--;                    // Décrémente le compteur
             }
             continue;
         }
-        if (count == 8 || (!count && c != '#') || (count && !is_valid_color(c)))
+        if (count == 7 || (!count && c != '#') || (count && !is_valid_color(c)))
         {
             uart_tx(c);
             uart_printstr("\r\nThe color must be sent in <#RRGGBB> format.\r\n");
             return;                        // On relance get_color(); du départ
         }
-        buffer[count++] = c;
+        buffer[count++] = is_valid_color(c);
         uart_tx(c);
     }
 }

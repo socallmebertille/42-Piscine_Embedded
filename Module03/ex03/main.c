@@ -2,10 +2,10 @@
 
 int main(void)
 {
-    cli();
+    cli();                // Ignorer les interruptions
     uart_init();          // Configure l'UART
     led_init();           // Configure LEDs
-    sei();
+    sei();                // Autoriser les interruptions
 
     while (1)
     {

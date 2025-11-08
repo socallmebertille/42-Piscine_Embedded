@@ -23,6 +23,6 @@ void    get_color(void);
 // ======== LEDs =========
 
 void    led_init(void);
-void    get_led(char *color);
+void    set_led(char *color);
 
 #endif

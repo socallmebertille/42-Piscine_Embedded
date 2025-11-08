@@ -1,5 +1,8 @@
 #include <avr/io.h>
+#include <util/delay.h>
 #include <avr/interrupt.h>
+
+static volatile uint8_t pressed = 0;
 
 void interrupt_init(void)
 {
@@ -12,15 +15,15 @@ void interrupt_init(void)
     PORTD |= (1 << PD2);    // Active pull-up
 
     // External Interrupt Control Register A
-    EICRA |= (1 << ISC01);  // The falling edge of INT0 generates an interrupt request.
+    EICRA |= (1 << ISC01) | (1 << ISC00);  // The rising edge of INT0 generates an interrupt request.
     // External Interrupt Mask Register
-    EIMSK |= (1 << INT0);   // Enable INT0 link to PD2 (=SW1)
+    EIMSK |= (1 << INT0);                  // Enable INT0 link to PD2 (=SW1)
 }
 
 ISR(INT0_vect)
 {
     // Code à exécuter quand l'interrupt se déclenche
-    PORTB ^= (1 << PB0);
+    pressed = 1; // Signal à la boucle principale
 }
 
 int main(void)
@@ -29,5 +32,13 @@ int main(void)
     interrupt_init();
     sei(); // Autoriser les interruptions
 
-    while (1) {}
+    while (1)
+    {
+        if (pressed)
+        {
+            _delay_ms(50);       // Anti-rebond
+            PORTB ^= (1 << PB0); // Inverse l'état de la LED
+            pressed = 0;         // Réinitialise le flag
+        }
+    }
 }

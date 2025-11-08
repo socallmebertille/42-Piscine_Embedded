@@ -45,7 +45,7 @@ int main(void)
 
     while (1)
     {
-        for (uint8_t i = 0; i < 255; i++)
+        for (uint16_t i = 0; i <= 255; i++)
         {
             wheel(i);      // Intensité des différentes 3 couleurs pour parcourir toutes les combinaisons
             _delay_ms(10); // ATTEND 10ms avant la prochaine couleur -> Vitesse de transition
