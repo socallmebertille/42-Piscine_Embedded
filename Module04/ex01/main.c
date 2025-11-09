@@ -6,13 +6,13 @@
 
 /*
 
-        Timer1 : F_PWM​ = 2000 Hz = 2000 interruptions
+        Timer1 : F_PWM​ = 2000 Hz = PWM est mis à jour 2000 fois par seconde
 ---> pour pouvoir faire 200 changements de duty cycle (0% -> 100% -> 0% en 1sec)
 en sachant que l'oeil humain remarque un clignottement a envirion 100 Hz
 
 PWM_TOP = (F_CPU / (prescaler * F_PWM)) - 1 = (16 000 000 / (8 * 2000)) - 1 = 999
 
-        Timer0 : F_interrupt = 2000 Hz
+        Timer0 : F_interrupt = 2000 Hz = l’interruption se déclenche aussi 2000 fois par seconde
 
 OCR0A = 16000000/(64*2000) - 1 = 125 - 1 = 124
 
@@ -40,7 +40,7 @@ void periodic_interrupt_init(void)   // Timer0
 {
     TCCR0A |= (1 << WGM01);                   // CTC Mode 2
     TCCR0B = (1 << CS01) | (1 << CS00);       // prescaler /64
-    OCR0A = 124;                              // ≈ 2000 Hz -> interruption toutes les 0,5 ms
+    OCR0A = 124;                              // ≈ 2000 Hz -> interruption toutes les 0,5 ms (= 0.0005 sec)
     TIMSK0 = (1 << OCIE0A);                   // activer interruption compare match A
 }
 
