@@ -1,25 +1,48 @@
-#include <avr/io.h>
-#include <util/delay.h>
-#include <avr/interrupt.h>
+#include "main.h"
 
-void init(void)
+void adc_init(void) // convertisseur analogique–numérique
 {
-    
+    // p.257 |  ADC Multiplexer Selection Register
+    ADMUX = (1 << REFS0);               // AVCC as a reference
+    // aucun bit de MUX[3:0] (analog channel selection) à mettre à 1 
+    // car on veut la broche ADC0 reliée au potentiomètre RV1
+    ADMUX |= (1 << ADLAR);              // lire les bits ajustés à gauche
+
+    // p.258 |  ADC Control and Status Register A
+    ADCSRA = (1 << ADEN);               // ADC activé
+    // p.249 |  requires an input clock frequency between 50kHz and 200kHz
+    // f_ADC ​= 16 000 kHz / 128 = 125 kHz ∈ [50;200] kHz
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) 
+            | (1 << ADPS0);              // prescaler /128
 }
 
-ISR()
+uint8_t adc_read(void)
 {
-    // Code à exécuter quand l'interrupt se déclenche
+    // p.258 |  ADC Control and Status Register A
+    ADCSRA |= (1 << ADSC);              // Start : lancer la conversion
+    while (ADCSRA & (1 << ADSC));       // attendre la fin
+    return ADCH;                        // lire les 8 bits (alignés à gauche)
+    // return ADCL;                     // si flag ADLAR à 0 -> bits alignés à droite
+}
+
+void uart_print_hex(uint8_t val)
+{
+    const char hex[] = "0123456789ABCDEF";
+    uart_tx(hex[val >> 4]);             // nibble haut -> 4 bits haut
+    uart_tx(hex[val & 0x0F]);           // nibble bas -> 4 bits bas (0x0F = 0b1111 = 0000 1111)
+    uart_tx('\r');
+    uart_tx('\n');
 }
 
 int main(void)
 {
-    cli(); // Ignorer les interruptions
-    init();
-    sei(); // Autoriser les interruptions
+    uart_init();
+    adc_init();
 
     while (1)
     {
-        
+        uint8_t value = adc_read();
+        uart_print_hex(value);
+        _delay_ms(20);
     }
 }

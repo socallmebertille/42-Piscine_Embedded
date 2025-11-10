@@ -2,6 +2,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#include "isr.h"
+
 #define PWM_TOP 999
 
 /*
@@ -47,7 +49,7 @@ void periodic_interrupt_init(void)   // Timer0
 static volatile uint16_t duty = 0;
 static volatile int8_t direction = 1;
 
-ISR(TIMER0_COMPA_vect)
+ISR_TC0_COMPARE_MATCH_A
 {
     duty += direction;
     if (duty >= PWM_TOP)

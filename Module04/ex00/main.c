@@ -2,6 +2,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#include "isr.h"
+
 static volatile uint8_t pressed = 0;
 
 void interrupt_init(void)
@@ -20,7 +22,7 @@ void interrupt_init(void)
     EIMSK |= (1 << INT0);                  // Enable INT0 link to PD2 (=SW1)
 }
 
-ISR(INT0_vect)
+ISR_EXTERNAL_0
 {
     // Code à exécuter quand l'interrupt se déclenche
     pressed = 1; // Signal à la boucle principale

@@ -2,6 +2,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#include "isr.h"
+
 void interrupt_init(void)
 {
     // LEDs D1:4 configuration
@@ -41,7 +43,7 @@ void set_leds(void)
     if (value & (1 << 3)) PORTB |= (1 << PB4);
 }
 
-ISR(INT0_vect) // Code à exécuter quand l'interrupt lie a SW1 se déclenche
+ISR_EXTERNAL_0 // Code à exécuter quand l'interrupt lie a SW1 se déclenche
 {
     _delay_ms(50); // attendre la fin des rebonds
     if (!(PIND & (1 << PD2))) { // si toujours appuyé
@@ -51,7 +53,7 @@ ISR(INT0_vect) // Code à exécuter quand l'interrupt lie a SW1 se déclenche
     }
 }
 
-ISR(PCINT2_vect) // Code à exécuter quand l'interrupt lie a SW2 se déclenche
+ISR_PIN_CHANGE_2 // Code à exécuter quand l'interrupt lie a SW2 se déclenche
 {
     _delay_ms(50); // attendre la fin des rebonds
     if (!(PIND & (1 << PD4))) { // si toujours appuyé

@@ -29,7 +29,7 @@ AVRDUDE_FLAGS = -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(NA
 
 all: hex flash
 
-hex: $(NAME).c
+hex: $(NAME).c isr.h
 	@echo "$(CYAN)🗘 Compiling $(NAME).c...$(RESET)"
 	@$(CC) $(CFLAGS) -o $(NAME).bin $(NAME).c
 	@echo "$(YELLOW)🗘 Converting binary to HEX...$(RESET)"
