@@ -12,8 +12,13 @@ void adc_init(void)
     DIDR0 |= (1 << ADC2D) | (1 << ADC1D) | (1 << ADC0D); // désactive les entrées digitales des broches
 }
 
-uint8_t adc_read(void)
+uint8_t adc_read(uint8_t peripheral)
 {
+    // 257 |  ADMUX – ADC Multiplexer Selection Register
+    // conserve le nibble haut                       (REFS1 REFS0 ADLAR  —)
+    // met à jour le nibble bas avec la bonne broche (MUX3  MUX2  MUX1  MUX0)
+    ADMUX = (ADMUX & 0xF0) | (peripheral & 0x0F);
+
     ADCSRA |= (1 << ADSC);              // lance la conversion
     while (ADCSRA & (1 << ADSC));       // attendre la fin
     return ADCH;                        // lire les 8 bits
@@ -34,21 +39,17 @@ int main(void)
     while (1)
     {
         // ADC0 : mettre MUX1=0 et MUX0=0
-        ADMUX &= ~(1 << MUX1);                  // efface le bit MUX1
-        uint8_t value = adc_read();
+        uint8_t value = adc_read(0);   // 0 = 0b0000
         uart_print_hex(value);
         uart_printstr(", ");
 
         // ADC1 : mettre MUX1=0 et MUX0=1
-        ADMUX |= (1 << MUX0);                   // met MUX0 à 1
-        value = adc_read();
+        value = adc_read(1);           // 1 = 0b0001
         uart_print_hex(value);
         uart_printstr(", ");
 
         // ADC2 : mettre MUX1=1 et MUX0=0
-        ADMUX &= ~(1 << MUX0);                  // efface le bit MUX0
-        ADMUX |= (1 << MUX1);                   // met MUX1 à 1
-        value = adc_read();
+        value = adc_read(2);           // 2 = 0b0010
         uart_print_hex(value);
         uart_printstr("\r\n");
 
