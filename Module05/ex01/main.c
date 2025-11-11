@@ -56,3 +56,16 @@ int main(void)
         _delay_ms(20);
     }
 }
+
+/*
+
+| Nom | Type de capteur | Broche ADC | Grandeur mesurée | Variation             |
+| --- | --------------- | ---------- | ---------------- | --------------------- |
+| RV1 | Potentiomètre   | ADC0       | Tension manuelle | gauche 0 → droite ff  |
+| R14 | LDR             | ADC1       | Luminosité       | + lumière → + tension |
+| R20 | NTC             | ADC2       | Température      | + chaleur → - tension |
+
+LDR (Light Dependent Resistor)
+NTC (Negative Temperature Coefficient)
+
+*/
