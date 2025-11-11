@@ -6,7 +6,7 @@ void adc_init(void) // convertisseur analogique–numérique
     PRR &= ~(1 << PRADC);               // active le module ADC
 
     // p.257 |  ADC Multiplexer Selection Register
-    ADMUX = (1 << REFS0);               // AVCC as a reference
+    ADMUX = (1 << REFS0);               // AVCC as a reference (AVCC = tension max)
     // aucun bit de MUX[3:0] (analog channel selection) à mettre à 1 
     // car on veut la broche ADC0 reliée au potentiomètre RV1
     ADMUX |= (1 << ADLAR);              // lire les bits ajustés à gauche
