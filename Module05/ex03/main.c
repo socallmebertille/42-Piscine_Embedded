@@ -49,10 +49,10 @@ int main(void)
     while (1)
     {
         // ADC8 = capteur température interne
-        uint16_t raw = adc_read(8);
+        uint16_t adc = adc_read(8);
         // Constantes ajustées pour cette puce spécifique
-        // raw ≈ 332 devrait donner environ 23°C
-        float temp = (raw - 266) / 1.03;
+        // adc ≈ 332 devrait donner environ 23°C
+        float temp = (adc - 266.25) / 1.03;
         uart_print_nbr((int)temp);
         uart_printstr("\r\n");
 
@@ -67,7 +67,7 @@ p.257 |  24.8 Temperature Measurement
 FORMULE de conversion température en celcius est :
 T = { [(ADCH << 8) | ADCL] - TOS } / k
     <=>
-temp_celsius = (adc_raw - OFFSET) / GAIN
+temp_celsius = (ADC - OFFSET) / GAIN
 
 OFFSET (Tos) :
 C'est la valeur ADC brute correspondant à 0°C
@@ -80,16 +80,22 @@ GAIN = 1.0 signifie : 1 LSB ≈ 1°C
 1 LSB = 1 unité de la valeur ADC
 C'est la plus petite variation mesurable par le convertisseu
 
-Table 24-2 de la datasheet :
-        -45°C → 242mV
-        +25°C → 314mV
-        +85°C → 380mV
+p.256 |  Table 24-2 de la datasheet :
+            -45°C → 242mV
+            +25°C → 314mV
+            +85°C → 380mV
 Calcul avec référence interne 1.1V
-    ADC à 25°C : ADC@25°C = (314mV / 1100mV) × 1024 ≈ 292
+    ADC@-45°C = (242 / 1100) × 1024 ≈ 225
+    ADC@25°C = (314mV / 1100mV) × 1024 ≈ 292
+    ADC@85°C = (380 / 1100) × 1024 ≈ 354
 GAIN théorique :
-    Entre 25°C et 85°C : ADC@85°C = (380 / 1100) × 1024 ≈ 354
-    GAIN = (354 - 292) / (85 - 25) = 62 / 60 ≈ 1.03
+    Entre 25°C et 85°C : GAIN = (354 - 292) / (85 - 25) = 62 / 60 ≈ 1.03 <====== YES
+    Entre -45°C et 85°C : GAIN = (354 - 225) / (85 - (-45)) = 129 / 130 ≈ 0.99
+    Entre -45°C et 25°C : GAIN = (292 - 225) / (25 - (-45)) = 67 / 70 ≈ 0.95
 OFFSET théorique :
-    OFFSET = 292 - 25 × 1.03 = 266
+    OFFSET = 292 - 25 × 1.03 = 266.25
+
+
+APPLICATION : T = (ADC@25 - OFFSET) / GAIN =  (292 - 266.25) / 1.03 = 25
 
 */
