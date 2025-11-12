@@ -52,7 +52,7 @@ int main(void)
         uint16_t raw = adc_read(8);
         // Constantes ajustées pour cette puce spécifique
         // raw ≈ 332 devrait donner environ 23°C
-        float temp = (raw - 309.0) / 1.0;
+        float temp = (raw - 266) / 1.03;
         uart_print_nbr((int)temp);
         uart_printstr("\r\n");
 
@@ -69,15 +69,27 @@ T = { [(ADCH << 8) | ADCL] - TOS } / k
     <=>
 temp_celsius = (adc_raw - OFFSET) / GAIN
 
-OFFSET (Tos = 309.0) :
+OFFSET (Tos) :
 C'est la valeur ADC brute correspondant à 0°C
 Chaque puce ATmega328P a un offset légèrement différent (non calibré en usine)
 
-GAIN (k = 1.0) :
+GAIN (k) :
 C'est la sensibilité -> combien la valeur ADC change par degré Celsius
 GAIN = 1.0 signifie : 1 LSB ≈ 1°C
 
 1 LSB = 1 unité de la valeur ADC
 C'est la plus petite variation mesurable par le convertisseu
+
+Table 24-2 de la datasheet :
+        -45°C → 242mV
+        +25°C → 314mV
+        +85°C → 380mV
+Calcul avec référence interne 1.1V
+    ADC à 25°C : ADC@25°C = (314mV / 1100mV) × 1024 ≈ 292
+GAIN théorique :
+    Entre 25°C et 85°C : ADC@85°C = (380 / 1100) × 1024 ≈ 354
+    GAIN = (354 - 292) / (85 - 25) = 62 / 60 ≈ 1.03
+OFFSET théorique :
+    OFFSET = 292 - 25 × 1.03 = 266
 
 */
