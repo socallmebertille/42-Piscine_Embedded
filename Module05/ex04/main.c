@@ -1,25 +1,38 @@
-#include <avr/io.h>
-#include <util/delay.h>
-#include <avr/interrupt.h>
+#include "main.h"
 
-void init(void)
+void adc_init(void)
 {
-    
+    PRR &= ~(1 << PRADC);               // active le module ADC
+
+    ADMUX = (1 << REFS0) | (1 << ADLAR); // AVCC as reference + ADLAR bit à gauche
+
+    ADCSRA = (1 << ADEN);               // ADC activé
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler /128
+
+    DIDR0 |= (1 << ADC0D);              // ADC0 pin enable
 }
 
-ISR()
+uint8_t adc_read(uint8_t peripheral)
 {
-    // Code à exécuter quand l'interrupt se déclenche
+    ADMUX = (ADMUX & 0xF0) | (peripheral & 0x0F); // MAJ nibble bas avec la bonne broche
+
+    ADCSRA |= (1 << ADSC);              // lance la conversion
+    while (ADCSRA & (1 << ADSC));       // attendre la fin
+    return ADCH;                        // lecture de conversion sur 8 bits
 }
 
 int main(void)
 {
-    cli(); // Ignorer les interruptions
-    init();
-    sei(); // Autoriser les interruptions
+    uart_init();
+    adc_init();
+    led_init();
 
     while (1)
     {
-        
+        // ADC0 -> MUX3:0 = 0
+        uint8_t val = adc_read(0);
+        wheel(val);
+    
+        _delay_ms(20);
     }
 }

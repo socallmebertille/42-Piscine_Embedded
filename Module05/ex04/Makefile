@@ -10,6 +10,8 @@ RESET    = \033[0m
 #================================ Values ================================
 
 NAME        = main
+SRC         = main.c uart.c led.c
+OBJ         = $(SRC:.c=.o)
 MCU         = atmega328p # Target microcontroller
 F_CPU       ?= 16000000UL # CPU clock frequeRESETy
 
@@ -29,12 +31,16 @@ AVRDUDE_FLAGS = -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(NA
 
 all: hex flash
 
-hex: $(NAME).c
-	@echo "$(CYAN)🗘 Compiling $(NAME).c...$(RESET)"
-	@$(CC) $(CFLAGS) -o $(NAME).bin $(NAME).c
+hex: $(OBJ) $(NAME).h
+	@echo "$(CYAN)🔗 Linking object files...$(RESET)"
+	@$(CC) $(CFLAGS) -o $(NAME).bin $(OBJ)
 	@echo "$(YELLOW)🗘 Converting binary to HEX...$(RESET)"
 	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).bin $(NAME).hex
 	@echo "$(GREEN)✔ HEX file generated: $(NAME).hex$(RESET)"
+
+%.o: %.c
+	@echo "$(CYAN)🗘 Compiling $<...$(RESET)"
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 flash:
 	@echo "$(PINK)→ Flashing microcontroller via avrdude...$(RESET)"
@@ -42,8 +48,8 @@ flash:
 	@echo "$(GREEN)✔ Flash completed successfully.$(RESET)"
 
 clean:
-	@echo "$(RED)🗑 Removing binary and HEX files...$(RESET)"
-	@rm -f $(NAME).bin $(NAME).hex
+	@echo "$(RED)🗑 Removing binary, HEX and object files...$(RESET)"
+	@rm -f $(NAME).bin $(NAME).hex $(OBJ)
 	@echo "$(GREEN)♻ Directory cleaned.$(RESET)"
 
 re: clean all
