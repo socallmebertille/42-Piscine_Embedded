@@ -50,9 +50,13 @@ int main(void)
     {
         // ADC8 = capteur température interne
         uint16_t adc = adc_read(8);
+        /* DEBUG
+        uart_printstr("ADC : ");
+        uart_print_nbr(adc);
+        uart_printstr(" | TEMP : "); */
         // Constantes ajustées pour cette puce spécifique
         // adc ≈ 332 devrait donner environ 23°C
-        float temp = (adc - 266.25) / 1.03;
+        float temp = (adc - 308.31) / 1.03;
         uart_print_nbr((int)temp);
         uart_printstr("\r\n");
 
@@ -97,5 +101,40 @@ OFFSET théorique :
 
 
 APPLICATION : T = (ADC@25 - OFFSET) / GAIN =  (292 - 266.25) / 1.03 = 25
+
+MAIS : 
+p.257 |  The temperature measurement is based on an on-chip temperature sensor... 
+=> calibrer le capteur afin de compenser les variations du processus
+
+REALITE :
+
+ADC : 332 | TEMP : 63
+ADC : 331 | TEMP : 62
+ADC : 331 | TEMP : 62
+ADC : 332 | TEMP : 63
+ADC : 332 | TEMP : 63
+ADC : 332 | TEMP : 63
+ADC : 332 | TEMP : 63
+ADC : 332 | TEMP : 63
+ADC : 332 | TEMP : 63
+ADC : 331 | TEMP : 62
+
+DONC ADAPTATION : 
+    23 = (332 - OFFSET) / 1.03
+    OFFSET = 332 - (23 × 1.03) = 332 - 23.69 ≈ 308.31
+
+RESULTAT :
+
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 331 | TEMP : 22
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 332 | TEMP : 23
+ADC : 331 | TEMP : 22
 
 */
