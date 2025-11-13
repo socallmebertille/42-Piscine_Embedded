@@ -10,7 +10,7 @@ RESET    = \033[0m
 #================================ Values ================================
 
 NAME        = main
-SRC         = main.c
+SRC         = main.c uart.c
 OBJ         = $(SRC:.c=.o)
 MCU         = atmega328p # Target microcontroller
 F_CPU       ?= 16000000UL # CPU clock frequeRESETy

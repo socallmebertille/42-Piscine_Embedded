@@ -7,52 +7,103 @@ void i2c_init(void)     // Inter-Integrated Circuit | Two-Wire Interface
     TWBR = 72;          // 100 000 = 16 000 000 / (16 + 2*TWBR*1) <=> TWBR = 72
     
     // p.241 |  TWSR bits 1:0 = Prescaler
-    TWSR = 0;           // 0 = prescaler /1 -> Valeur par défaut → meilleure précision
+    TWSR = 0;           // 0 = prescaler /1 -> valeur par défaut + meilleure précision
     
-    // p.239.40 |  TWCR - TWI Control Register
+    // p.239:40 |  TWCR - TWI Control Register
     TWCR = (1 << TWEN); // TWEN = 1 : Active le module TWI
 }
 
 void i2c_start(void)
 {
-    // p.223 |  Pour générer une condition START
-    // TWINT = 1 (clear interrupt flag = opération TWI précédente terminée 
+    // p.225:6 |  A START condition is sent by writing the following value to TWCR
+    // TWINT = 1 (clear  the TWINT Flag = opération TWI précédente terminée 
     //                                 + CPU peut lire statut TWSR ou lire prochaine cmd)
-    // TWSTA = 1 (génère START)
-    // TWEN = 1 (active TWI)
-    TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
+    // TWSTA = 1 (génère START ->  TWSTA must be written to one to transmit a START condition)
+    // TWEN = 1 (active TWI -> TWEN must be set to enable the 2-wire Serial Interface)
+    TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN); // step 1 p.225
     
-    // p.221 |  Attendre que TWINT repasse à 1
-    // (indique que l'opération est terminée)
-    while (!(TWCR & (1 << TWINT)));
+    // p.221 |  Attendre que TWINT repasse à 1 (indique que l'opération est terminée)
+    while (!(TWCR & (1 << TWINT)));                   // step 2 p.225
     
     // Optionnel : vérifier le code de statut
     // p.226 |  Table 21-3 - Status codes
     // START transmis : 0x08
     // Repeated START : 0x10
+
+    // Step 3: Vérifier que START a été transmis
+    // Status attendu: TW_START (0x08) ou TW_REP_START (0x10)
+    uart_printstr("START: 0x");
+    uart_print_hex(TWSR & 0xF8);
+    uart_printstr("\r\n");
+
+    if ((TWSR & 0xF8) != TW_START && (TWSR & 0xF8) != TW_REP_START)
+    {
+        uart_printstr("ERROR: START failed\r\n");
+        return;
+    }
+
+    // Step 4: Envoyer l'adresse du slave (AHT20 = 0x38) en mode écriture
+    TWDR = (AHT20_ADDR << 1) | 0;  // Adresse + bit W=0
+    TWCR = (1 << TWINT) | (1 << TWEN);
+    while (!(TWCR & (1 << TWINT)));
+
+    // Step 5: Vérifier que le slave a répondu ACK
+    // Status attendu: TW_MT_SLA_ACK (0x18)
+    uart_printstr("SLA+W: 0x");
+    uart_print_hex(TWSR & 0xF8);
+    uart_printstr("\r\n");
+
+    if ((TWSR & 0xF8) != TW_MT_SLA_ACK)
+    {
+        uart_printstr("ERROR: Slave NACK\r\n");
+        return;
+    }
+
 }
 
 void i2c_stop(void)
 {
-    // p.224 |  Pour générer une condition STOP
-    // TWINT = 1 (clear interrupt flag)
+    // p.224:7 |  Pour générer une condition STOP
     // TWSTO = 1 (génère STOP)
-    // TWEN = 1 (active TWI)
-    TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);
+    TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);   // step 7.1 p.225
     
-    // Note : Pas besoin d'attendre TWINT pour STOP
-    // Le STOP est automatique
+    // Attendre que STOP soit effectivement transmis
+    while (TWCR & (1 << TWSTO));
+
+    uart_printstr("STOP\r\n");
 }
 
 int main(void)
 {
+    uart_init();
     i2c_init();
+
+    uart_printstr("\r\n=== I2C Test ===\r\n");
+
     i2c_start();
-    // Envoyer adresse 0x38 en mode écriture : (0x38 << 1) | 0
     i2c_stop();
 
-    while (1)
-    {
-
-    }
+    while (1) {}
 }
+
+/*
+
+Sortie attendue sur UART :
+=== I2C Test ===
+    START: 0x08
+    SLA+W: 0x18
+    STOP
+
+Ou si le capteur ne répond pas :
+    === I2C Test ===
+    START: 0x08
+    SLA+W: 0x20
+    ERROR: Slave NACK
+    STOP
+
+Code de status :
+    0x08 = TW_START (START transmis)
+    0x18 = TW_MT_SLA_ACK (Slave a répondu ACK)
+    0x20 = TW_MT_SLA_NACK (Slave n'a pas répondu)
+
+*/
