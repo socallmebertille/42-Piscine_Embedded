@@ -2,7 +2,7 @@
 # define MAIN_H
 
 # include <avr/io.h>
-# include <util/delay.h>
+# include <util/twi.h>
 
 // ======== UART =========
 
@@ -12,11 +12,17 @@
 void    uart_init(void);
 void    uart_tx(char c);
 char    uart_rx(void);
+void    uart_print_hex(uint8_t val);
+void    uart_print_nbr(uint16_t val);
 void    uart_printstr(const char* str);
 
-// ========= LED ==========
+// ======== I2C =========
 
-void    led_init(void);
-void    wheel(uint8_t pos);
+# define AHT20_ADDR     0x38
+# define SCL_FREQ       100000UL
+
+void    i2c_init(void);
+void    i2c_start(void);
+void    i2c_stop(void);
 
 #endif

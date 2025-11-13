@@ -22,6 +22,20 @@ void uart_tx(char c)
     UDR0 = c;
 }
 
+void uart_print_hex(uint8_t val)
+{
+    const char hex[] = "0123456789ABCDEF";
+    uart_tx(hex[val >> 4]);
+    uart_tx(hex[val & 0x0F]);
+}
+
+void uart_print_nbr(uint16_t val)
+{
+    if (val >= 10)
+        uart_print_nbr(val / 10);
+    uart_tx('0' + (val % 10));
+}
+
 void uart_printstr(const char* str)
 {
     while (*str)
