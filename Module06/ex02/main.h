@@ -3,6 +3,7 @@
 
 # include <avr/io.h>
 # include <util/twi.h>
+# include <util/delay.h>
 
 // ======== UART =========
 
@@ -22,8 +23,15 @@ void    uart_printstr(const char* str);
 # define AHT20_ADDR     0x38
 # define SCL_FREQ       100000UL
 
-void    i2c_init(uint32_t scl_freq_hz);
+# define STATUS         (TWSR & 0xF8) // registre status sans bits de prescaler
+
+void    i2c_init(uint16_t kHz);
 void    i2c_start(void);
 void    i2c_stop(void);
+void    i2c_write_status(char *action);
+
+void    i2c_write(unsigned char data);
+void    i2c_read(void);
+void    print_hex_value(char c);
 
 #endif

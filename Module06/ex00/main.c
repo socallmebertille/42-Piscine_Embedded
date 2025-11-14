@@ -2,12 +2,12 @@
 
 void i2c_init(void)     // Inter-Integrated Circuit | Two-Wire Interface
 {
+    // p.240:1 |  TWSR bits 1:0 = Prescaler -> les 2 premiers bits de droite sont réservés au prescaler
+    TWSR = 0;           // 0 = prescaler /1 -> valeur par défaut (toutes les données de la datasheet sont en fonction de ca) + meilleure précision
+    
     // p.222 |  SCL = CPU_Clock / (16 + 2*TWBR*Prescaler) = Serial Clock Line = nombre de ticks (impulsions) envoyés par seconde
     // Pour 100kHz avec 16MHz et Prescaler=1 :
     TWBR = 72;          // 100 000 = 16 000 000 / (16 + 2*TWBR*1) <=> TWBR = 72
-    
-    // p.240:1 |  TWSR bits 1:0 = Prescaler -> les 2 premiers bits de droiet sont réservés au prescaler
-    TWSR = 0;           // 0 = prescaler /1 -> valeur par défaut (toutes les données de la datasheet sont en fonction de ca) + meilleure précision
     
     // p.239:40 |  TWCR - TWI Control Register
     TWCR = (1 << TWEN); // TWEN = 1 : Active le module TWI
@@ -32,7 +32,8 @@ void i2c_start(void)
     uart_printstr("\r\n");
     
     // p.227 |  status attendus : TW_START (0x08) ou TW_REP_START (0x10) (version macro de twi.h)
-    if ((TWSR & 0xF8) != TW_START && (TWSR & 0xF8) != TW_REP_START) // step 3.1 p.225 (0xF8 = 1111 1000)
+    // on check la valeur du registre sans les bits reserve au prescaler (0xF8 = 1111 1000)
+    if ((TWSR & 0xF8) != TW_START && (TWSR & 0xF8) != TW_REP_START) // step 3.1 p.225
     {
         uart_printstr("ERROR: START failed\r\n");
         return;
@@ -54,7 +55,7 @@ void i2c_start(void)
     uart_print_hex(TWSR & 0xF8);
     uart_printstr("\r\n");
     
-    // p.227 |  status attendus: TW_MT_SLA_ACK (0x18) -> slave a répondu ACK (version macro de twi.h)
+    // p.227 |  status attendus: TW_MT_SLA_ACK (0x18) = SLA+W transmis + slave a répondu ACK (version macro de twi.h)
     if ((TWSR & 0xF8) != TW_MT_SLA_ACK)                             // step 5.1 p.225
     {
         uart_printstr("ERROR: Slave NACK\r\n");
@@ -72,9 +73,6 @@ void i2c_stop(void)
     // p.224:7 |  Pour générer une condition STOP
     // TWSTO = 1 (génère STOP)
     TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);                 // step 7.2 p.225
-    
-    // attendre que STOP soit effectivement transmis
-    while (TWCR & (1 << TWSTO));
 
     uart_printstr("STOP\r\n");
 }

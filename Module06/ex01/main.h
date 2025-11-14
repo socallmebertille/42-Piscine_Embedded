@@ -23,6 +23,8 @@ void    uart_printstr(const char* str);
 # define AHT20_ADDR     0x38
 # define SCL_FREQ       100000UL
 
+# define STATUS         (TWSR & 0xF8) // registre status sans bits de prescaler
+
 void    i2c_init(uint16_t kHz);
 void    i2c_start(void);
 void    i2c_stop(void);
