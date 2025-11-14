@@ -59,9 +59,25 @@ void i2c_write(unsigned char data)  // step 3.2:5.1 p.225
     }
 }
 
+float last_h[NB_MEAS] = {0};
+float last_t[NB_MEAS] = {0};
+uint8_t idx = 0;
+
+float avg_h(void) {
+    float sum = 0;
+    for (int i = 0; i < NB_MEAS; i++) sum += last_h[i];
+    return sum / NB_MEAS;
+}
+
+float avg_t(void) {
+    float sum = 0;
+    for (int i = 0; i < NB_MEAS; i++) sum += last_t[i];
+    return sum / NB_MEAS;
+}
+
 void i2c_read(void)
 {
-    unsigned char data;
+    unsigned char data[7];
 
     for (uint8_t i = 0; i < 7; i++)
     {
@@ -72,30 +88,34 @@ void i2c_read(void)
             TWCR = (1 << TWINT) | (1 << TWEN);               // NACK => SANS TWEA pour indiquer qu'on attend ACK sur le prochain octet reçu
 
         while (!(TWCR & (1 << TWINT))); // attendre la fin de transmission
-
-        data = TWDR;
-
-        print_hex_value(data);          // afficher 1 octet
-        if (i < 6)
-            uart_printstr(" ");         // espace entre les bytes
+        data[i] = TWDR;
     }
-    uart_printstr("\r\n");
 
-/*
+    // Humidité
+    uint32_t humidity = ((uint32_t)data[1] << 12) |
+                        ((uint32_t)data[2] << 4)  |
+                        ((uint32_t)(data[3] >> 4));
+    float h = (humidity * 100.0) / 1048576.0;
 
-https://files.seeedstudio.com/wiki/Grove-AHT20_I2C_Industrial_Grade_Temperature_and_Humidity_Sensor/AHT20-datasheet-2020-4-16.pdf?utm_source=chatgpt.com
+    // Température
+    uint16_t temperature = ((uint32_t)(data[3] & 0x0F) << 16) |
+                           ((uint32_t)data[4] << 8)           |
+                           ((uint32_t)data[5]);
+    float t = ((temperature * 200.0) / 1048576.0) - 50.0;
 
-chaque données composees de 8 bits
-- humidité sur 20 bits
-- température sur 12 bits
-- CRC = Cyclic Redundancy Check, utilisé pour vérifier que la transmission I2C s’est bien passée
+    last_h[idx] = h;
+    last_t[idx] = t;
+    idx = (idx + 1) % NB_MEAS;
 
-| [0]    | [1]                 | [2]           | [3]          | [4]       | [5]      | [6] |
-|--------|---------------------|---------------|--------------|-----------|----------|-----|
-| status | humidity 19:12 bits | humidity 11:4 | humidity 3:0 | temp 11:8 | temp 7:0 | CRC |
-
-*/
-
+    // Choix nb chiffre apres la virgule p.2 | Sensor Performance
+    char buf[8];
+    uart_printstr("Temperature: ");
+    dtostrf(avg_t(), 4, 1, buf); // typical error entre 20 et 60C -> ±0.5
+    uart_printstr(buf);
+    uart_printstr("C, Humidity: ");
+    dtostrf(avg_h(), 4, 0, buf); // maximum error entre 20 et 80% -> ±2
+    uart_printstr(buf);
+    uart_printstr("%\r\n");
 }
 
 void print_hex_value(char c)

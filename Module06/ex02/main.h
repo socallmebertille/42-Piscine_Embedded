@@ -4,6 +4,7 @@
 # include <avr/io.h>
 # include <util/twi.h>
 # include <util/delay.h>
+# include <stdlib.h>
 
 // ======== UART =========
 
@@ -15,7 +16,7 @@ void    uart_init(void);
 void    uart_tx(char c);
 char    uart_rx(void);
 void    uart_print_hex(uint8_t val);
-void    uart_print_nbr(uint16_t val);
+void    uart_print_nbr(uint32_t val);
 void    uart_printstr(const char* str);
 
 // ======== I2C =========
@@ -24,6 +25,8 @@ void    uart_printstr(const char* str);
 # define SCL_FREQ       100000UL
 
 # define STATUS         (TWSR & 0xF8) // registre status sans bits de prescaler
+
+# define NB_MEAS        3
 
 void    i2c_init(uint16_t kHz);
 void    i2c_start(void);

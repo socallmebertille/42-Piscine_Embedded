@@ -40,4 +40,3 @@ int main(void)
         _delay_ms(2000);     // p.5 |  it is recommended to measure data every 2 seconds
     }
 }
-
