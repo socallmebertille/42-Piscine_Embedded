@@ -6,8 +6,8 @@ void i2c_init(void)     // Inter-Integrated Circuit | Two-Wire Interface
     // Pour 100kHz avec 16MHz et Prescaler=1 :
     TWBR = 72;          // 100 000 = 16 000 000 / (16 + 2*TWBR*1) <=> TWBR = 72
     
-    // p.241 |  TWSR bits 1:0 = Prescaler
-    TWSR = 0;           // 0 = prescaler /1 -> valeur par défaut (toutes es donnes de la datasheet sont en fonction de ca) + meilleure précision
+    // p.240:1 |  TWSR bits 1:0 = Prescaler -> les 2 premiers bits de droiet sont réservés au prescaler
+    TWSR = 0;           // 0 = prescaler /1 -> valeur par défaut (toutes les données de la datasheet sont en fonction de ca) + meilleure précision
     
     // p.239:40 |  TWCR - TWI Control Register
     TWCR = (1 << TWEN); // TWEN = 1 : Active le module TWI
@@ -32,7 +32,7 @@ void i2c_start(void)
     uart_printstr("\r\n");
     
     // p.227 |  status attendus : TW_START (0x08) ou TW_REP_START (0x10) (version macro de twi.h)
-    if ((TWSR & 0xF8) != TW_START && (TWSR & 0xF8) != TW_REP_START) // step 3.1 p.225
+    if ((TWSR & 0xF8) != TW_START && (TWSR & 0xF8) != TW_REP_START) // step 3.1 p.225 (0xF8 = 1111 1000)
     {
         uart_printstr("ERROR: START failed\r\n");
         return;
@@ -40,6 +40,7 @@ void i2c_start(void)
 
     // https://files.seeedstudio.com/wiki/Grove-AHT20_I2C_Industrial_Grade_Temperature_and_Humidity_Sensor/AHT20-datasheet-2020-4-16.pdf?utm_source=chatgpt.com
     // -> p.8 |  the 7-bit I2C device address 0x38
+    // p.241 |  TWDR – TWI Data Register
     // envoyer l'adresse du slave (AHT20 = 0x38) en mode écriture
     // SLA+W = adresse du périphérique esclave + bit W = write = 0 = le maître veut écrire vers l’esclave
     TWDR = (AHT20_ADDR << 1) | 0;                                   // step 3.2 p.225

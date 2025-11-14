@@ -6,6 +6,7 @@
 
 // ======== UART =========
 
+# define F_CPU          16000000UL
 # define BAUD           115200
 # define UART_BAUDRATE  (F_CPU / (16 * BAUD))
 
@@ -21,7 +22,7 @@ void    uart_printstr(const char* str);
 # define AHT20_ADDR     0x38
 # define SCL_FREQ       100000UL
 
-void    i2c_init(void);
+void    i2c_init(uint32_t scl_freq_hz);
 void    i2c_start(void);
 void    i2c_stop(void);
 
