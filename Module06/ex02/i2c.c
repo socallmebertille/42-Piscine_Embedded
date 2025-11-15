@@ -59,6 +59,21 @@ void i2c_write(unsigned char data)  // step 3.2:5.1 p.225
     }
 }
 
+uint8_t i2c_read_ack(void)
+{
+    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA); // TWEA = ACK
+    while (!(TWCR & (1 << TWINT)));
+    return TWDR;
+}
+
+uint8_t i2c_read_nack(void)
+{
+    TWCR = (1 << TWINT) | (1 << TWEN); // pas de TWEA = NACK
+    while (!(TWCR & (1 << TWINT)));
+    return TWDR;
+}
+
+
 float last_h[NB_MEAS] = {0};
 float last_t[NB_MEAS] = {0};
 uint8_t idx = 0;
@@ -79,29 +94,22 @@ void i2c_read(void)
 {
     unsigned char data[7];
 
-    for (uint8_t i = 0; i < 7; i++)
-    {
-        // p.240 |  Bit 6 – TWEA: TWI Enable Acknowledge Bit
-        if (i < 6)
-            TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA); // ACK => TWEA pour indiquer qu'on attend ACK sur le prochain octet reçu
-        else
-            TWCR = (1 << TWINT) | (1 << TWEN);               // NACK => SANS TWEA pour indiquer qu'on attend ACK sur le prochain octet reçu
+    for (int i = 0; i < 6; i++)
+        data[i] = i2c_read_ack();
 
-        while (!(TWCR & (1 << TWINT))); // attendre la fin de transmission
-        data[i] = TWDR;
-    }
+    data[6] = i2c_read_nack();
 
     // Humidité
     uint32_t humidity = ((uint32_t)data[1] << 12) |
                         ((uint32_t)data[2] << 4)  |
                         ((uint32_t)(data[3] >> 4));
-    float h = (humidity * 100.0) / 1048576.0;
+    float h = (humidity * 100.0) / 1048576.0; // p.9 |  RH[%] = (RH * 100) / 2^20
 
     // Température
-    uint16_t temperature = ((uint32_t)(data[3] & 0x0F) << 16) |
+    uint32_t temperature = ((uint32_t)(data[3] & 0x0F) << 16) |
                            ((uint32_t)data[4] << 8)           |
                            ((uint32_t)data[5]);
-    float t = ((temperature * 200.0) / 1048576.0) - 50.0;
+    float t = ((temperature * 200.0) / 1048576.0) - 50.0; // p.9 |  T(°C) = (T * 200) / 2^20 - 50
 
     last_h[idx] = h;
     last_t[idx] = t;
@@ -110,10 +118,10 @@ void i2c_read(void)
     // Choix nb chiffre apres la virgule p.2 | Sensor Performance
     char buf[8];
     uart_printstr("Temperature: ");
-    dtostrf(avg_t(), 4, 1, buf); // typical error entre 20 et 60C -> ±0.5
+    dtostrf(avg_t(), 3, 1, buf); // typical error entre 20 et 60°C -> ±0.5
     uart_printstr(buf);
     uart_printstr("C, Humidity: ");
-    dtostrf(avg_h(), 4, 0, buf); // maximum error entre 20 et 80% -> ±2
+    dtostrf(avg_h(), 2, 0, buf); // maximum error entre 20 et 80% -> ±2
     uart_printstr(buf);
     uart_printstr("%\r\n");
 }

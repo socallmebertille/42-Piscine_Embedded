@@ -59,6 +59,20 @@ void i2c_write(unsigned char data)  // step 3.2:5.1 p.225
     }
 }
 
+uint8_t i2c_read_ack(void)
+{
+    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA); // TWEA = ACK
+    while (!(TWCR & (1 << TWINT)));
+    return TWDR;
+}
+
+uint8_t i2c_read_nack(void)
+{
+    TWCR = (1 << TWINT) | (1 << TWEN); // pas de TWEA = NACK
+    while (!(TWCR & (1 << TWINT)));
+    return TWDR;
+}
+
 void i2c_read(void)
 {
     unsigned char data;

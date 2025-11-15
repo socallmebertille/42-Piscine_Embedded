@@ -34,6 +34,8 @@ void    i2c_stop(void);
 void    i2c_write_status(char *action);
 
 void    i2c_write(unsigned char data);
+uint8_t i2c_read_ack(void);
+uint8_t i2c_read_nack(void);
 void    i2c_read(void);
 void    print_hex_value(char c);
 
