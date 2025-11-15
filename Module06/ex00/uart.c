@@ -29,7 +29,7 @@ void uart_print_hex(uint8_t val)
     uart_tx(hex[val & 0x0F]);
 }
 
-void uart_print_nbr(uint16_t val)
+void uart_print_nbr(uint32_t val)
 {
     if (val >= 10)
         uart_print_nbr(val / 10);

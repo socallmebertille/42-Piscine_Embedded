@@ -2,7 +2,7 @@
 
 // https://files.seeedstudio.com/wiki/Grove-AHT20_I2C_Industrial_Grade_Temperature_and_Humidity_Sensor/AHT20-datasheet-2020-4-16.pdf?utm_source=chatgpt.com
 
-void aht20_calibration(void) // p.8 | Step 1
+static void aht20_calibration(void) // p.8 | Step 1
 {
     i2c_start();
     i2c_write((AHT20_ADDR << 1) | 1);   // SLA+R = 0111 0001 = 0x71
@@ -24,7 +24,7 @@ void aht20_calibration(void) // p.8 | Step 1
 
 }
 
-void aht20_trigger_measure(void) // p.8 | Step 2
+static void aht20_trigger_measure(void) // p.8 | Step 2
 {
     i2c_start();
 
@@ -37,7 +37,7 @@ void aht20_trigger_measure(void) // p.8 | Step 2
     i2c_stop();
 }
 
-void aht20_read_temp_hum_data(void) // p.8
+static void aht20_read_temp_hum_data(void) // p.8
 {
     i2c_start();
 

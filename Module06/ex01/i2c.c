@@ -4,8 +4,12 @@ void i2c_init(uint16_t kHz)         // init => Inter-Integrated Circuit | Two-Wi
 {
     TWSR = 0; // 0 = prescaler /1
     uint32_t scl = (uint32_t)kHz * 1000UL; // SCL = CPU_Clock / (16 + 2*TWBR*Prescaler)
-    uint32_t twbr = (F_CPU / scl - 16) / 2;
-    TWBR = (uint8_t)twbr;
+    if (scl == 0) scl = 100000UL;
+    uint32_t twbr_calc = 0;
+    if (F_CPU > scl * 16UL)
+        twbr_calc = (F_CPU / scl - 16UL) / 2UL;
+    if (twbr_calc > 255UL) twbr_calc = 255UL;
+    TWBR = (uint8_t)twbr_calc;
     TWCR = (1 << TWEN); // TWEN = active TWI
 }
 
@@ -76,23 +80,15 @@ uint8_t i2c_read_nack(void)
 void i2c_read(void)
 {
     unsigned char data;
-
-    for (uint8_t i = 0; i < 7; i++)
+    for (int i = 0; i < 6; i++)
     {
-        // p.240 |  Bit 6 – TWEA: TWI Enable Acknowledge Bit
-        if (i < 6)
-            TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA); // ACK => TWEA pour indiquer qu'on attend ACK sur le prochain octet reçu
-        else
-            TWCR = (1 << TWINT) | (1 << TWEN);               // NACK => SANS TWEA pour indiquer qu'on attend ACK sur le prochain octet reçu
-
-        while (!(TWCR & (1 << TWINT))); // attendre la fin de transmission
-
-        data = TWDR;
-
+        data = i2c_read_ack();
         print_hex_value(data);          // afficher 1 octet
         if (i < 6)
             uart_printstr(" ");         // espace entre les bytes
     }
+    data = i2c_read_nack();
+    print_hex_value(data);
     uart_printstr("\r\n");
 
 /*

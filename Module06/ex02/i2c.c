@@ -4,8 +4,12 @@ void i2c_init(uint16_t kHz)         // init => Inter-Integrated Circuit | Two-Wi
 {
     TWSR = 0; // 0 = prescaler /1
     uint32_t scl = (uint32_t)kHz * 1000UL; // SCL = CPU_Clock / (16 + 2*TWBR*Prescaler)
-    uint32_t twbr = (F_CPU / scl - 16) / 2;
-    TWBR = (uint8_t)twbr;
+    if (scl == 0) scl = 100000UL;
+    uint32_t twbr_calc = 0;
+    if (F_CPU > scl * 16UL)
+        twbr_calc = (F_CPU / scl - 16UL) / 2UL;
+    if (twbr_calc > 255UL) twbr_calc = 255UL;
+    TWBR = (uint8_t)twbr_calc;
     TWCR = (1 << TWEN); // TWEN = active TWI
 }
 
@@ -73,21 +77,31 @@ uint8_t i2c_read_nack(void)
     return TWDR;
 }
 
+static float last_h[NB_MEAS] = {0};
+static float last_t[NB_MEAS] = {0};
+static uint8_t idx = 0;
+static uint8_t meas_count = 0;
 
-float last_h[NB_MEAS] = {0};
-float last_t[NB_MEAS] = {0};
-uint8_t idx = 0;
+static uint8_t meas_count_clamped(void)
+{
+    if (meas_count == 0) return 0;
+    return (meas_count < NB_MEAS) ? meas_count : NB_MEAS;
+}
 
 float avg_h(void) {
+    uint8_t count = meas_count_clamped();
+    if (count == 0) return 0.0f;
     float sum = 0;
-    for (int i = 0; i < NB_MEAS; i++) sum += last_h[i];
-    return sum / NB_MEAS;
+    for (uint8_t i = 0; i < count; i++) sum += last_h[i];
+    return sum / count;
 }
 
 float avg_t(void) {
+    uint8_t count = meas_count_clamped();
+    if (count == 0) return 0.0f;
     float sum = 0;
-    for (int i = 0; i < NB_MEAS; i++) sum += last_t[i];
-    return sum / NB_MEAS;
+    for (uint8_t i = 0; i < count; i++) sum += last_t[i];
+    return sum / count;
 }
 
 void i2c_read(void)
@@ -114,6 +128,7 @@ void i2c_read(void)
     last_h[idx] = h;
     last_t[idx] = t;
     idx = (idx + 1) % NB_MEAS;
+    if (meas_count < NB_MEAS) meas_count++;
 
     // Choix nb chiffre apres la virgule p.2 | Sensor Performance
     char buf[8];
@@ -121,7 +136,7 @@ void i2c_read(void)
     dtostrf(avg_t(), 3, 1, buf); // typical error entre 20 et 60°C -> ±0.5
     uart_printstr(buf);
     uart_printstr("C, Humidity: ");
-    dtostrf(avg_h(), 2, 0, buf); // maximum error entre 20 et 80% -> ±2
+    dtostrf(avg_h(), 3, 0, buf); // maximum error entre 20 et 80% -> ±2
     uart_printstr(buf);
     uart_printstr("%\r\n");
 }

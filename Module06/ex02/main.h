@@ -10,7 +10,7 @@
 
 # define F_CPU          16000000UL
 # define BAUD           115200
-# define UART_BAUDRATE  (F_CPU / (16 * BAUD))
+# define UART_BAUDRATE  (F_CPU / (16UL * BAUD))
 
 void    uart_init(void);
 void    uart_tx(char c);
