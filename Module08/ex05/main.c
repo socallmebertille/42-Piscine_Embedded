@@ -65,9 +65,12 @@ int main(void)
     adc_init();
     buttons_init();
 
+    // Masquer le curseur
+    uart_printstr("\033[?25l");
+
     while(1)
     {
-        // lecture du potentiomètre pour la couleur courante
+        // Lecture du potentiomètre pour la couleur courante
         uint8_t val = adc_read(0);
         leds[current_led][current_color] = val;
 
@@ -79,4 +82,7 @@ int main(void)
 
         _delay_ms(50);
     }
+
+    // Facultatif : remettre le curseur
+    uart_printstr("\033[?25h");
 }
