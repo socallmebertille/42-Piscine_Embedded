@@ -150,24 +150,26 @@ int find_kv(const char *key, uint16_t *addr_out)
     {
         magic = EEPROM_read(addr);
         if (magic != 0x7F)
-            return -1; 
-
+        {
+			addr++;
+			continue ;
+		}
+    
         klen = EEPROM_read(addr + 1);
         vlen = EEPROM_read(addr + 2);
-
+    
         for (uint8_t i = 0; i < klen; i++)
             tmp[i] = EEPROM_read(addr + 3 + i);
         tmp[klen] = 0;
-
+    
         if (ft_strcmp(tmp, key) == 0)
         {
             *addr_out = addr;
             return 0;
         }
-
+    
         addr += 3 + klen + vlen;
     }
-
     return -1;
 }
 
@@ -202,25 +204,49 @@ int write_kv(const char *key, const char *value)
 
     while (addr < 1024)
     {
-        if (EEPROM_read(addr) != 0x7F)
-            break;
-        uint8_t k = EEPROM_read(addr + 1);
-        uint8_t v = EEPROM_read(addr + 2);
-        addr += 3 + k + v;
+        uint8_t m = EEPROM_read(addr);
+
+        /*  CASE 1 : KV existant → on saute */
+        if (m == 0x7F)
+        {
+            uint8_t k = EEPROM_read(addr + 1);
+            uint8_t v = EEPROM_read(addr + 2);
+            addr += 3 + k + v;
+            continue;
+        }
+
+        /* CASE 2 : zone libre ou oubliée (OK potentiellement) */
+        if (m == 0x00 || m == 0xFF)
+        {
+            uint8_t danger = 0;
+
+            /* Vérifier si on va écraser un magic 0x7F dans la zone d'écriture */
+            for (uint16_t i = addr; i < addr + need && i < 1024; i++)
+            {
+                if (EEPROM_read(i) == 0x7F)
+                {
+                    danger = 1;
+                    break;
+                }
+            }
+
+            if (!danger)
+            {
+                EEPROM_write_if_needed(addr, 0x7F);
+                EEPROM_write_if_needed(addr + 1, klen);
+                EEPROM_write_if_needed(addr + 2, vlen);
+                for (uint8_t i = 0; i < klen; i++)
+                    EEPROM_write_if_needed(addr + 3 + i, key[i]);
+                for (uint8_t i = 0; i < vlen; i++)
+                    EEPROM_write_if_needed(addr + 3 + klen + i, value[i]);
+                return (addr);
+            }
+        }
+
+        /* CASE 3 : autre byte corrompu → fin d’espace utile */
+        addr++;
     }
-
-    if (addr + need >= 1024)
-        return -2;
-
-    EEPROM_write_if_needed(addr, 0x7F);
-    EEPROM_write_if_needed(addr + 1, klen);
-    EEPROM_write_if_needed(addr + 2, vlen);
-
-    for (uint8_t i = 0; i < klen; i++)
-        EEPROM_write_if_needed(addr + 3 + i, key[i]);
-
-    for (uint8_t i = 0; i < vlen; i++)
-        EEPROM_write_if_needed(addr + 3 + klen + i, value[i]);
+    return (-2);
 
     return addr;
 }
@@ -248,12 +274,13 @@ int main(void)
     {
         uart_printstr("> ");
         uart_readword(cmd);
+        if (cmd[0] == 0) continue ;
 
         if (ft_strcmp(cmd, "READ") == 0)         // READ
         {
             uart_read_quoted(key, 32);
             uart_printstr("\r\n");
-
+            if (key[0] == 0) continue ;
             if (read_kv(key, out) == 0)
             {
                 uart_printstr("\"");
@@ -267,20 +294,31 @@ int main(void)
         else if (ft_strcmp(cmd, "WRITE") == 0) // WRITE
         {
             uart_read_quoted(key, 32);
+            if (key[0] == 0)
+            {
+                uart_printstr("\r\n");
+                continue ;
+            }
             uart_read_quoted(value, 32);
             uart_printstr("\r\n");
-
+            if (value[0] == 0) continue ;
             int r = write_kv(key, value);
-
             if (r == 1) uart_printstr("already exists\r\n");
             else if (r == -2) uart_printstr("no space left\r\n");
-            else uart_printstr("done\r\n");
+            else {
+                /* r contient l’adresse (uint16) retournée par write_kv */
+                uart_printstr("0x");
+                uart_print_hex((r >> 8) & 0xFF);
+                uart_print_hex(r & 0xFF);
+                uart_printstr("\r\n");
+            }
         }
 
         else if (ft_strcmp(cmd, "FORGET") == 0) // FORGET
         {
             uart_read_quoted(key, 32);
             uart_printstr("\r\n");
+            if (key[0] == 0) continue ;
             if (forget_kv(key) == 0) uart_printstr("done\r\n");
             else uart_printstr("not found\r\n");
         }
@@ -290,5 +328,12 @@ int main(void)
             uart_printstr("\r\n");
             EEPROM_hexdump();
         }
+
+        // else if (ft_strcmp(cmd, "ERASE") == 0)
+        // {
+        //     for (uint16_t i = 0; i < 1024; i++)
+        //         EEPROM_write(i, 0xFF);
+        //     uart_printstr("erased\r\n");
+        // }
     }
 }

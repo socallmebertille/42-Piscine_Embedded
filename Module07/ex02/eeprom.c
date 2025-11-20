@@ -112,6 +112,8 @@ void EEPROM_hexdump(void)
         {
             uart_print_hex(line[i]);
             uart_printstr(" ");
+            if (i == 7)                    // espace supplémentaire au milieu
+				uart_printstr(" ");
         }
 
         uart_printstr("|");
@@ -122,7 +124,7 @@ void EEPROM_hexdump(void)
             if (c >= 32 && c <= 126)
                 uart_tx(c);
             else
-                uart_tx(' ');
+                uart_tx('.');
         }
         uart_printstr("|\r\n");
 
