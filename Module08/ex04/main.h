@@ -19,11 +19,6 @@ void			uart_printstr(const char *str);
 void			uart_nibble(uint8_t n);
 void			uart_addr(unsigned int addr);
 
-// ======== ADC ==========
-
-void            adc_init(void);
-uint8_t         adc_read(uint8_t peripheral);
-
 // ======== SPI ==========
 
 void            SPI_MasterInit(void);
