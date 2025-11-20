@@ -40,7 +40,7 @@ void led_send_frame(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness)
     //     5 bits global de 0-31 car 2^5 = 32
     if (brightness > 31) brightness = 31;
 
-    SPI_MasterTransmit(0b1110000 | brightness);
+    SPI_MasterTransmit(0b11100000 | brightness);
     SPI_MasterTransmit(b);
     SPI_MasterTransmit(g);
     SPI_MasterTransmit(r);
