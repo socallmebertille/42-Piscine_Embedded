@@ -34,10 +34,10 @@ void i2c_stop(void)                  // step 7.2 p.225
 
 void i2c_write_status(char *action)
 {
-    // if (action) { uart_printstr(action); uart_printstr(" "); }
-    // uart_printstr("status: 0x");
-    // uart_print_hex(STATUS);
-    // uart_printstr("\r\n");
+    if (action) { uart_printstr(action); uart_printstr(" "); }
+    uart_printstr("status: 0x");
+    uart_print_hex(STATUS);
+    uart_printstr("\r\n");
 }
 
 void i2c_write(unsigned char data)  // step 3.2:5.1 p.225
