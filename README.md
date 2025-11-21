@@ -12,17 +12,29 @@
 
 <h2>Table of Contents</h2>
 <ul class="list-disc pl-4 my-0">
+  <li class="my-0"><a href="#guides-par-module">Guides par Module</a></li>
   <li class="my-0"><a href="#overview">Overview</a></li>
   <ul class="list-disc pl-4 my-0">
     <li class="my-0"><a href="#initialization-on-windows-avec-terminal-wsl">Initialization on Windows avec terminal WSL</a></li>
     <li class="my-0"><a href="#few-embedded-notions">Few Embedded notions</a></li>
   </ul>
-  <li class="my-0"><a href="#ok">Ok</a>
-  <ul class="list-disc pl-4 my-0">
-    <li class="my-0"><a href="#ok">Ok</a></li>
-  </ul>
-  </li>
 </ul>
+
+<h2>Guides par Module</h2>
+
+Chaque module contient un guide détaillé sur le sujet traité :
+
+| Module | Sujet | Guide |
+|--------|-------|-------|
+| Module00 | Makefiles | [MAKEFILE_GUIDE.md](Module00/MAKEFILE_GUIDE.md) |
+| Module01 | Timers | [TIMERS_GUIDE.md](Module01/TIMERS_GUIDE.md) |
+| Module02 | UART | [UART_GUIDE.md](Module02/UART_GUIDE.md) |
+| Module03 | PWM | [PWM_GUIDE.md](Module03/PWM_GUIDE.md) |
+| Module04 | Interrupts | [INTERRUPTS_GUIDE.md](Module04/INTERRUPTS_GUIDE.md) |
+| Module05 | ADC | [ADC_GUIDE.md](Module05/ADC_GUIDE.md) |
+| Module06 | I2C | [I2C_GUIDE.md](Module06/I2C_GUIDE.md) |
+| Module07 | EEPROM | [EEPROM_GUIDE.md](Module07/EEPROM_GUIDE.md) |
+| Module08 | SPI | [SPI_GUIDE.md](Module08/SPI_GUIDE.md) |
 
 <h2>Overview</h2>
 <h3>Initialization on Windows avec terminal WSL</h3>
@@ -211,7 +223,3 @@ Il sert à écouter et envoyer des données sur le port série de ton microcontr
 | Rejoindre une session | `screen -r`                                   |
 | Forcer la fermeture   | `sudo fuser -k /dev/ttyUSB0`                  |
 
-
-
-<h2>Ok</h2>
-<h3>Ok</h3>
